@@ -41,18 +41,32 @@ export const getResumeById = async (req, res) => {
     }
 }
 
+import mongoose from "mongoose";
+
 export const getPublicResumeById = async (req, res) => {
-    try {
-        const { resumeId } = req.params;
-        const resume = await Resume.findOne({ public: true, _id: resumeId })
-        if (!resume) {
-            return res.status(404).json({ message: "Resume not found" })
-        }
-        return res.status(200).json({ resume })
-    } catch (error) {
-        return res.status(400).json({ message: error.message })
+  try {
+    const { resumeId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(resumeId)) {
+      return res.status(400).json({ message: "Invalid resume ID" });
     }
-}
+
+    const resume = await Resume.findOne({
+      _id: resumeId,
+      public: true
+    });
+
+    if (!resume) {
+      return res.status(404).json({ message: "Resume not found" });
+    }
+
+    return res.status(200).json({ resume });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export const updateResume = async (req, res) => {
   try {
